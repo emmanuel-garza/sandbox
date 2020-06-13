@@ -1,0 +1,1 @@
+extern float loop_cube(int);
