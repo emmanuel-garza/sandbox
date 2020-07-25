@@ -1,7 +1,8 @@
 #include "/home/emmanuel/miniconda3/envs/solver-cpp/include/eigen3/Eigen/Dense"
 
 #ifdef USE_FLOAT
-typedef float myprecision;
+using real = float; //real
+typedef float real;
 typedef Eigen::ArrayXf myarray;
 // float operator "" _mp(double d)
 // {
@@ -9,7 +10,8 @@ typedef Eigen::ArrayXf myarray;
 
 // };
 #else
-typedef double myprecision;
+using precision = double; //real
+// typedef long double precisionong;
 typedef Eigen::ArrayXd myarray;
 // double operator "" _mp(double d)
 // {
@@ -41,9 +43,11 @@ void FejerQuadrature1(myarray &x_k, myarray &w_k)
         ind_max = (n - 1) / 2;
     }
 
+    // std::exp(2.0f)
+
     for (int k = 0; k < n; k++)
     {
-        myprecision theta = M_PI * (2.0 * k + 1.0) / n;
+        precision theta = M_PI * (2.0 * k + 1.0) / n;
 
         x_k[k] = cos(theta / 2.0);
 
@@ -64,8 +68,9 @@ int main()
 
     double t1 = omp_get_wtime();
 
-    int n = 50000;
+    int n = 20000;
 
+    // Eigen::ArrayXXd x2(3,5);
     myarray x_k(n), w_k(n);
 
     FejerQuadrature1( x_k, w_k );
@@ -73,11 +78,11 @@ int main()
     cout << w_k.sum() << endl;
 
 
-    // vector<myprecision> myvector;
+    // vector<real> myvector;
 
     // myvector.assign(n, 0.2);
 
-    // myprecision sum_res = 0.0;
+    // real sum_res = 0.0;
 
     // for (int i = 0; i < n; i++)
     //     for (int j = 0; j < n; j++)
