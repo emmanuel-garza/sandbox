@@ -190,7 +190,7 @@ int main()
                 integrals[ind_trg] += std::cos(wavenum * r) / (4.0_d * PI_R * r);
             }
         }
-}
+    }
 
     t2 = omp_get_wtime();
     std::cout << integrals[ind_sample] << std::endl;
