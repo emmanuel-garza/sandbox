@@ -1,4 +1,4 @@
-NVCC_FLAGS = -g -G -Xcompiler "-fopenmp -Wall"
+NVCC_FLAGS = -g -G -Xcompiler "-Ofast -fopenmp -Wall"
 
 all: main.exe
 	export OMP_NUM_THREADS=6; \
