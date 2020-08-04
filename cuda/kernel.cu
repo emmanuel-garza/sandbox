@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <omp.h>
-#include <cmath>
+// #include <cmath>
 
 // For double precision
 using precision = double;
@@ -62,15 +62,15 @@ __global__ void integralKernel(
 
 int main()
 {
-    std::cout << "Hello!" << std::endl;
-
     double t1, t2;
     
     // Lets initialize a vector for the coordinates
-    int nu = 100;
-    int nv = 512;
+    int nu = 1000;
+    int nv = 512*2;
 
     int n = nu * nv;
+    
+    std::cout << "Total Number of Points = " << n << std::endl;
 
     int ind_sample = n-1;
 
@@ -155,6 +155,8 @@ int main()
     cudaFree(x0_trg_cu);
     cudaFree(x1_trg_cu);
     cudaFree(x2_trg_cu);
+
+    return 0;
 
     // Now we do it in the CPU
     t1 = omp_get_wtime();
