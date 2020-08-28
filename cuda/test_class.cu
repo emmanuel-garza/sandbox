@@ -17,11 +17,13 @@ using precision = float;
 #define cu_sqrt sqrtf
 #define cu_cos cosf
 
+__host__ precision operator"" _d(long double v) {
+    return (precision)v;
+}
 
-// Literals for constants, need one for the host and one for the device
-__host__ precision operator"" _d(long double v) { return (precision)v; }
-__device__ precision operator"" _dd(long double v) { return (precision)v; }
-
+__device__ precision operator"" _dd(long double v) {
+    return (precision)v;
+}
 
 // Compute distance in the GPU
 __device__ precision distance(
@@ -32,28 +34,46 @@ __device__ precision distance(
         (x0_src - x0_trg) * (x0_src - x0_trg) +
         (x1_src - x1_trg) * (x1_src - x1_trg) +
         (x2_src - x2_trg) * (x2_src - x2_trg));
-        
+
 }
+
+class GPUData
+{
+public:
+
+    precision *integrals_cu = 0;
+
+    precision *x0_src_cu = 0;
+    precision *x1_src_cu = 0;
+    precision *x2_src_cu = 0;
+
+    precision *x0_trg_cu = 0;
+    precision *x1_trg_cu = 0;
+    precision *x2_trg_cu = 0;
+
+
+};
 
 // Launch Kernel for the GPU
 __global__ void integralKernel(
-    precision *integrals_out,
-    precision *x0_src, precision *x1_src, precision *x2_src,
-    precision *x0_trg, precision *x1_trg, precision *x2_trg,
-    int len_src)
+    int len_src, GPUData gpu_data)
 {
+
+    // printf("Data = %d\n", gpu_data.a);
+
     // Get the index that corresponds to this thread/block pair
     const int ind_trg = blockIdx.x * blockDim.x + threadIdx.x;
 
-    integrals_out[ind_trg] = 0.0_dd;
+    gpu_data.integrals_cu[ind_trg] = 0.0_dd;
 
     for (int ind_src = 0; ind_src < len_src; ind_src++)
     {
         precision r = distance(
-            x0_src[ind_src], x1_src[ind_src], x2_src[ind_src],
-            x0_trg[ind_trg], x1_trg[ind_trg], x2_trg[ind_trg]);
+            gpu_data.x0_src_cu[ind_src], gpu_data.x1_src_cu[ind_src], gpu_data.x2_src_cu[ind_src],
+            gpu_data.x0_trg_cu[ind_trg], gpu_data.x1_trg_cu[ind_trg], gpu_data.x2_trg_cu[ind_trg]);
 
-        integrals_out[ind_trg] += cu_cos(wavenum * r) / (4.0_dd * PI_R * r);
+    // cu_cos(wavenum * r)
+        gpu_data.integrals_cu[ind_trg] += 1.0_dd / (4.0_dd * PI_R * r);
     }
 
     return;
@@ -63,13 +83,13 @@ __global__ void integralKernel(
 int main()
 {
     double t1, t2;
-    
+
     // Lets initialize a vector for the coordinates
     int nu = 1000;
     int nv = 512;
 
     int n = nu * nv;
-    
+
     std::cout << "Total Number of Points = " << n << std::endl;
 
     int ind_sample = n-1;
@@ -100,74 +120,62 @@ int main()
     // Computation in the GPU
 
     t1 = omp_get_wtime();
-
-    precision *integrals_cu = 0;
-
-    precision *x0_src_cu = 0;
-    precision *x1_src_cu = 0;
-    precision *x2_src_cu = 0;
-
-    precision *x0_trg_cu = 0;
-    precision *x1_trg_cu = 0;
-    precision *x2_trg_cu = 0;
+    GPUData gpu_data;
 
     // Allocate memory in the GPU
-    cudaMalloc(&integrals_cu, n * sizeof(precision));
+    cudaMalloc(&gpu_data.integrals_cu, n * sizeof(precision));
 
-    cudaMalloc(&x0_src_cu, n * sizeof(precision));
-    cudaMalloc(&x1_src_cu, n * sizeof(precision));
-    cudaMalloc(&x2_src_cu, n * sizeof(precision));
+    cudaMalloc(&gpu_data.x0_src_cu, n * sizeof(precision));
+    cudaMalloc(&gpu_data.x1_src_cu, n * sizeof(precision));
+    cudaMalloc(&gpu_data.x2_src_cu, n * sizeof(precision));
 
-    cudaMalloc(&x0_trg_cu, n * sizeof(precision));
-    cudaMalloc(&x1_trg_cu, n * sizeof(precision));
-    cudaMalloc(&x2_trg_cu, n * sizeof(precision));
+    cudaMalloc(&gpu_data.x0_trg_cu, n * sizeof(precision));
+    cudaMalloc(&gpu_data.x1_trg_cu, n * sizeof(precision));
+    cudaMalloc(&gpu_data.x2_trg_cu, n * sizeof(precision));
 
     // Copy from the device to the GPU
-    cudaMemcpy(x0_src_cu, &(x0_src[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
-    cudaMemcpy(x1_src_cu, &(x1_src[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
-    cudaMemcpy(x2_src_cu, &(x2_src[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_data.x0_src_cu, &(x0_src[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_data.x1_src_cu, &(x1_src[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_data.x2_src_cu, &(x2_src[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
 
-    cudaMemcpy(x0_trg_cu, &(x0_trg[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
-    cudaMemcpy(x1_trg_cu, &(x1_trg[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
-    cudaMemcpy(x2_trg_cu, &(x2_trg[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_data.x0_trg_cu, &(x0_trg[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_data.x1_trg_cu, &(x1_trg[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_data.x2_trg_cu, &(x2_trg[0]), n*sizeof(precision), cudaMemcpyHostToDevice);
 
     //Launch Cuda Kernel
-    integralKernel<<<nu, nv>>>(
-        integrals_cu,
-        x0_src_cu, x1_src_cu, x2_src_cu,
-        x0_trg_cu, x1_trg_cu, x2_trg_cu,
-        n);
+    
+    integralKernel<<<nu, nv>>>(n, gpu_data);
 
     // Copy to device
-    cudaMemcpy(&(integrals[0]), integrals_cu, n*sizeof(precision), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&(integrals[0]), gpu_data.integrals_cu, n*sizeof(precision), cudaMemcpyDeviceToHost);
 
     t2 = omp_get_wtime();
     std::cout << integrals[ind_sample] << std::endl;
     std::cout << "Time GPU = " << t2 - t1 << " seconds" << std::endl;
 
     // Free Device Memory
-    cudaFree(integrals_cu);
+    cudaFree(gpu_data.integrals_cu);
 
-    cudaFree(x0_src_cu);
-    cudaFree(x1_src_cu);
-    cudaFree(x2_src_cu);
+    cudaFree(gpu_data.x0_src_cu);
+    cudaFree(gpu_data.x1_src_cu);
+    cudaFree(gpu_data.x2_src_cu);
 
-    cudaFree(x0_trg_cu);
-    cudaFree(x1_trg_cu);
-    cudaFree(x2_trg_cu);
+    cudaFree(gpu_data.x0_trg_cu);
+    cudaFree(gpu_data.x1_trg_cu);
+    cudaFree(gpu_data.x2_trg_cu);
 
     return 0;
 
     // Now we do it in the CPU
     t1 = omp_get_wtime();
 
-#pragma omp parallel
+    #pragma omp parallel
     {
-#pragma omp for schedule(guided, 1)
-        for(int ind_trg = 0; ind_trg < n; ind_trg++)
+        #pragma omp for schedule(guided, 1)
+        for (int ind_trg = 0; ind_trg < n; ind_trg++)
         {
             integrals[ind_trg] = 0.0_d;
-            for(int ind_src = 0; ind_src < n; ind_src++)
+            for (int ind_src = 0; ind_src < n; ind_src++)
             {
                 precision r = std::sqrt(
                     std::pow(x0_src[ind_src] - x0_trg[ind_trg], 2) +
