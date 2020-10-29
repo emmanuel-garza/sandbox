@@ -2,6 +2,17 @@
 
 int main()
 {
+
+    auto f0 = [](precision u_aux, precision v_aux) {
+        return std::sqrt(
+            1.0f - u_aux * u_aux - v_aux * v_aux +
+            std::pow(u_aux * v_aux, 2) / 3.0f);
+    };
+
+    std::cout << (f0(0.30f, 0.00f)) << std::endl;
+
+    return 0;
+
     // int n = 20;
     // int n_repeat = 10;
 
