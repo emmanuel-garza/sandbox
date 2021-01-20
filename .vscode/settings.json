@@ -48,6 +48,7 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "*.cu": "cpp"
+        "*.cu": "cpp",
+        "complex": "cpp"
     }
 }

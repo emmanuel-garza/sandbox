@@ -137,7 +137,7 @@ int main()
         x0_src_cu, x1_src_cu, x2_src_cu,
         x0_trg_cu, x1_trg_cu, x2_trg_cu,
         n);
-
+  
     // Copy to device
     cudaMemcpy(&(integrals[0]), integrals_cu, n*sizeof(precision), cudaMemcpyDeviceToHost);
 

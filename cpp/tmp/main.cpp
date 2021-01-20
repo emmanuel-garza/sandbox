@@ -12,12 +12,13 @@ int main()
 
     vector<double> vec;
 
-    vec = {1.0, 2.0};
+    vec = {1.0, 2.0, 3.0};
 
-    vec = {1.0};
+    // vec = {1.0};
     
+    int ind = 0;
     for (int i = 0; i < vec.size(); i++)
-        cout << vec[i] << endl;
+        cout << vec[ind++] << endl;
 
     return 0;
 }
