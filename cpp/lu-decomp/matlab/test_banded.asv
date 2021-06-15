@@ -1,0 +1,38 @@
+n = 10;
+
+n_band_left = 2;
+n_band_right = 2;
+
+A = sparse(n, n);
+
+% c = 1;
+% for ind = 1:n
+%     for ind2 = max(1, ind-n_band_left) : min(n, ind+n_band_right)
+%         A(ind, ind2) = 1.1;
+%         c = c+1;
+%     end
+% end
+
+B = zeros(n,n);
+for ind2 = -n_band_left:n_band_right
+    ind2
+    B = B + diag(1.1*ones(n-i,1), -1);
+end
+B
+
+return
+
+% A = A + sparse(diag(
+
+b = ones(n,1);
+
+%[L, U] = lu(A');
+
+y = A \ b;
+
+%y = U \ (L \ b);
+
+y(1:10)
+
+
+condest(A)

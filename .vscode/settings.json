@@ -49,6 +49,18 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "*.cu": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "list": "cpp",
+        "sparse": "cpp",
+        "sparseextra": "cpp",
+        "pardisosupport": "cpp",
+        "cstring": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "ctime": "cpp",
+        "map": "cpp",
+        "ratio": "cpp",
+        "mutex": "cpp",
+        "thread": "cpp"
     }
 }

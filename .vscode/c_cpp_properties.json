@@ -3,7 +3,10 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/home/emmanuel/Software/opennurbs",
+                "/home/emmanuel/miniconda3/envs/solver-cpp/include/",
+                "/home/emmanuel/miniconda3/envs/solver-cpp/include/eigen3/"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
