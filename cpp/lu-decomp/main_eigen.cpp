@@ -127,6 +127,8 @@ void BandedTest(int n, int n_band_left, int n_band_right)
     solver.pardisoParameterArray()[24-1] = 1; // OpenMP
     solver.pardisoParameterArray()[25-1] = 1; // OpenMP
 
+    // solver.pardisoParameterArray()[28-1] = 1; // OpenMP
+
 
     solver.pardisoParameterArray()[11-1] = 1; // Improved accuracy seems to be needed
     solver.pardisoParameterArray()[13-1] = 2; // Improved accuracy seems to be needed
@@ -168,7 +170,7 @@ int main()
 
     // SmallTest();
 
-    BandedTest(100000, 20, 20);
+    BandedTest(10000, 1000, 1000);
 
     return 0;
 }
