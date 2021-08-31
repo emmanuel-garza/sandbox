@@ -6,20 +6,14 @@
 
 using namespace std;
 
-vector<string> AllMagicNumbers(int n)
-{
-    vector<string> res;
-
-    
-
-    
-
-}
 
 
 int main()
 {
-    cout << "Hello World!" << endl;
+    vector<int> a = {1, 2};
+    vector<int> b = {2, 1};
+
+    cout << (a == b) << endl;
 
     return 0;
 }
